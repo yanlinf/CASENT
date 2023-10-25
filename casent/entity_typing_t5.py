@@ -32,10 +32,10 @@ class T5ForEntityTypingConfig(T5Config):
     type_vocab: List[str] = []
     oov_type: Optional[str] = 'businesswoman'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if len(self.type_vocab) == 0:
-            self.type_vocab = UFETDataset.get_type_vocab('data/ufet')
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     if len(self.type_vocab) == 0:
+    #         self.type_vocab = UFETDataset.get_type_vocab('data/ufet')
 
 
 class IdentityCalibration(nn.Module):
