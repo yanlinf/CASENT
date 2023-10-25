@@ -1,5 +1,5 @@
 torch
-transformers==4.29.4
+transformers==4.29.2
 openai==0.27.8
 datasets
 accelerate
