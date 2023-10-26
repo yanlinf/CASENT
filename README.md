@@ -4,7 +4,7 @@
 
 > Calibrated Seq2Seq Models for Efficient and Generalizable Ultra-fine Entity Typing<br/>
 > Yanlin Feng, Adithya Pratapa, David R Mortensen<br/>
-> EMNLP Findings, 2023 (to appear)
+> EMNLP Findings 2023
 
 ## Installation
 
@@ -28,12 +28,13 @@ Pretrained models are available on HuggingFace for running inference.
 from casent.entity_typing_t5 import T5ForEntityTypingPredictor
 
 predictor = T5ForEntityTypingPredictor.from_pretrained('yanlinf/casent-large')
-preds = predictor.predict_raw(
+predictor.predict_raw(
     ['A court in Jerusalem sentenced <M> a Palestinian </M> to 16 life terms for forcing a bus off a cliff July 6 , killing 16 people']
 )
-preds[0].scores
-# preds[0].types: ['person', 'criminal', 'male']
-# preds[0].scores: [0.975004041450473, 0.6304963191225533, 0.5362320213818272]
+```
+
+```plain
+[EntityTypingOutput(types=['person', 'criminal', 'male'], scores=[0.975004041450473, 0.6304963191225533, 0.5362320213818272])]
 ```
 
 ### Usage 2: Predict WikiData types
@@ -47,11 +48,13 @@ predictor = T5ForWikidataEntityTypingPredictor.from_pretrained(
     'yanlinf/casent-large',
     ontology_path='ontology_data/ontology_expanded.json'
 )
-preds = predictor.predict_raw(
+predictor.predict_raw(
     ['A court in Jerusalem sentenced <M> a Palestinian </M> to 16 life terms for forcing a bus off a cliff July 6 , killing 16 people']
 )
-# preds[0].wd_types: [Concept(Q215627, person), Concept(Q2159907, criminal), Concept(Q6581097, male)]
-# preds[0].scores: [0.975004041450473, 0.6304963191225533, 0.5362320213818272])]
+```
+
+```plain
+[WikidataEntityTypingOutput(wd_types=[Concept(Q215627, person), Concept(Q2159907, criminal), Concept(Q6581097, male)], scores=[0.975004041450473, 0.6304963191225533, 0.5362320213818272])]
 ```
 
 ## Training CASENT
