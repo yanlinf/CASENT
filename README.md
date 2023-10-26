@@ -1,6 +1,10 @@
-# CASENT
+# CASENT 
 
-Demo: http://chronos.lti.cs.cmu.edu:8401/
+![](https://img.shields.io/badge/License-MIT-green.svg) [![](https://img.shields.io/badge/🎈-Demo-blue.svg)](http://chronos.lti.cs.cmu.edu:8401/)
+
+> Calibrated Seq2Seq Models for Efficient and Generalizable Ultra-fine Entity Typing<br/>
+> Yanlin Feng, Adithya Pratapa, David R Mortensen<br/>
+> EMNLP Findings, 2023 (to appear)
 
 ## Installation
 
