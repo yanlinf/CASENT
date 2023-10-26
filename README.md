@@ -1,6 +1,9 @@
 # CASENT 
 
-![](https://img.shields.io/badge/License-MIT-green.svg) [![](https://img.shields.io/badge/🎈-Demo-blue.svg)](http://chronos.lti.cs.cmu.edu:8401/)
+[![](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) 
+[![](https://img.shields.io/badge/🤗-HuggingFace-red.svg)](https://huggingface.co/yanlinf/casent-large)
+[![](https://img.shields.io/badge/📄-Paper-yellow.svg)](https://huggingface.co/yanlinf/casent-large)
+[![](https://img.shields.io/badge/🎈-Demo-blue.svg)](http://chronos.lti.cs.cmu.edu:8401/)
 
 > Calibrated Seq2Seq Models for Efficient and Generalizable Ultra-fine Entity Typing<br/>
 > Yanlin Feng, Adithya Pratapa, David R Mortensen<br/>
@@ -82,5 +85,5 @@ Predictions will be saved to `dev_pred.json` and `test_pred.json` under the mode
 ### 4. Evaluation
 
 ```bash
-python evaluate_ufet_predictions.py --input_path checkpoints/exp0/test_pred.json
+python evaluate_ufet_prediction.py --input_path checkpoints/exp0/test_pred.json
 ```
