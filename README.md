@@ -9,8 +9,9 @@
 > Yanlin Feng, Adithya Pratapa, David R Mortensen<br/>
 > EMNLP Findings 2023
 
-## Installation
+CASENT (Calibrated Seq2Seq Entity Typing) is a multi-label entity classification model designed for extremely large label space. CASENT offers several advantages compared to previous methods: 1) Standard maximum likelihood training; 2) Efficient inference through a single autoregressive decoding pass; 3) Calibrated confidence scores; 4) Strong generalization performance to unseen domains and types. We have provided pretrained models that work with both the UFET types and WikiData types.
 
+## Installation
 
 ```bash
 conda create -n casent python=3.10
