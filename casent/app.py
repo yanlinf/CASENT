@@ -14,7 +14,7 @@ MODEL_DEVICE_MAPPING = {
 
 EXAMPLE_INPUTS = [
     'Current figures say <M> 203 miners </M> were killed , and another 22 were injured with 13 miners still missing .',
-    'Efforts to rescue 10 miners trapped <M> in a collapsed and flooded coal mine </M> in northern Mexico intensified Thursday with hundreds of people',
+    'Efforts to rescue 10 miners trapped in <M> a collapsed and flooded coal mine </M> in northern Mexico intensified Thursday with hundreds of people',
     '<M>This case, manufacturer control number 2014-0128812</M> is a report from a solicited program GSI Sponsored Market Research referring to a 63 year-old male patient.',
     'A court in Jerusalem sentenced <M> a Palestinian </M> to 16 life terms for forcing a bus off a cliff July 6 , killing 16 people , Israeli radio reported .',
 ]
@@ -30,23 +30,13 @@ def load_predictors(run_on_cpu: bool = False):
     return predictors
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--cpu', action='store_true')
-    args = parser.parse_args()
-    print(args)
-    print()
-
-    st.set_page_config(
-        page_title='CASENT',
-        page_icon='🎈',
-    )
-    st.title('🎈 CASENT')
-
+def entity_typing_demo(args):
+    st.write('')
+    st.write('')
     st.write('Choose your models:')
     model_options = []
     for model in MODEL_CHECKPOINT_MAPPING:
-        model_options.append(st.checkbox(model, True))
+        model_options.append(st.checkbox(f'`{model}`', True))
 
     example = st.selectbox('Example inputs', ['Select a sentence'] + EXAMPLE_INPUTS)
 
@@ -105,6 +95,32 @@ def main():
             type2score = {t: s for t, s in zip(pred.types, pred.scores)}
             type_score_pairs = sorted(type2score.items(), key=lambda t: -t[1])
             st.table(pd.DataFrame(type_score_pairs, columns=('Predicted label', 'Score')))
+
+
+def entity_extraction_demo(args):
+    pass
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--cpu', action='store_true')
+    args = parser.parse_args()
+    print(args)
+    print()
+
+    st.set_page_config(
+        page_title='CASENT',
+        page_icon='🎈',
+    )
+    st.title('🎈 CASENT')
+
+    entity_typing, entity_extraction = st.tabs(['Entity Typing', 'Entity Extraction'])
+
+    with entity_typing:
+        entity_typing_demo(args)
+
+    with entity_extraction:
+        entity_extraction_demo(args)
 
 
 if __name__ == '__main__':
