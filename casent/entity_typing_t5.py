@@ -597,6 +597,97 @@ class T5ForWikidataEntityTypingPredictor:
         return res
 
 
+def extract_noun_phrases(
+        root: stanza.models.constituency.parse_tree.Tree
+) -> List[Tuple[int, int, str]]:
+    """
+    Extract a list of (start_token_idx, end_token_idx) that represents
+    noun phrases. We only extract maximal noun phrases that have no
+    sentence constituents inside.
+    """
+    NP = []
+    S = []
+
+    def dfs(curr_node):
+        nonlocal start_token
+        if curr_node.is_leaf():
+            start_token += 1
+        else:
+            if curr_node.label == 'NP':
+                NP.append((start_token, start_token + len(curr_node.leaf_labels())))
+            elif curr_node.label == 'S':
+                S.append((start_token, start_token + len(curr_node.leaf_labels())))
+            for child in curr_node.children:
+                dfs(child)
+
+    start_token = 0
+    dfs(root)
+
+    NP = [(l, r) for l, r in NP if not any(l <= ll and r >= rr for ll, rr in S)]
+    NP = [(l, r) for l, r in NP if not any(l >= ll and r <= rr for ll, rr in NP if (l, r) != (ll, rr))]
+    return [(l, r, 'NP') for l, r in NP]
+
+
+@dataclass
+class EntityMentionSpan:
+    start_char: int
+    end_char: int  # mention = text[start_char:end_char]
+    mention_span: str
+    score: float
+    all_types: List[str]
+    all_scores: List[float]
+
+    def __str__(self):
+        return f'Mention("{self.mention_span}", {self.score:.2f})'
+
+    def __repr__(self):
+        return str(self)
+
+
+def extract_entities_by_type(
+        predictor: T5ForEntityTypingPredictor,
+        stanza_pipeline: stanza.Pipeline,
+        text: str,
+        target_ufet_type: str,
+        threshold: Optional[float] = None,
+        eval_batch_size: int = 1,
+        use_gpu: bool = False
+) -> List[EntityMentionSpan]:
+    if use_gpu:
+        predictor.to(torch.device('cuda:0'))
+
+    doc = stanza_pipeline(text)
+
+    entity_typing_inputs = []
+    spans = []
+    for i, sentence in enumerate(doc.sentences):
+        for start_token, end_token, label in extract_noun_phrases(sentence.constituency):
+            start_char = sentence.tokens[start_token].start_char
+            end_char = sentence.tokens[end_token - 1].end_char
+            span = text[start_char:end_char].strip()
+            print(span)
+            entity_typing_inputs.append(text[:start_char] + ' <M> ' + span + ' </M> ' + text[end_char:])
+            spans.append(EntityMentionSpan(
+                start_char=start_char,
+                end_char=end_char,
+                mention_span=span,
+                score=-1.0,
+                all_types=[],
+                all_scores=[]
+            ))
+
+    preds = predictor.predict_raw(entity_typing_inputs, eval_batch_size=eval_batch_size)
+    res = []
+    for span, pred in zip(spans, preds):
+        type2score = {t: s for t, s in zip(pred.types, pred.scores)}
+        if target_ufet_type in type2score and (threshold is None or type2score[target_ufet_type] >= threshold):
+            span.score = type2score[target_ufet_type]
+            span.all_types = pred.types
+            span.all_scores = pred.scores
+            res.append(span)
+    return res
+
+
 def tokenize_t5(
         tokenizer: PreTrainedTokenizer,
         contexts: List[str],
