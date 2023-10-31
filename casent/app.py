@@ -120,6 +120,8 @@ def entity_typing_demo(args):
             write_ufet_pred(pred)
         elif isinstance(pred, WikidataEntityTypingOutput):
             write_wikidata_pred(pred)
+        else:
+            raise ValueError(f'Unknown prediction type: {type(pred)}')
 
         if show_uncalibrated:
             st.write(f'`{model_name}` uncalibrated scores:')
@@ -128,6 +130,8 @@ def entity_typing_demo(args):
                 write_ufet_pred(pred)
             elif isinstance(pred, WikidataEntityTypingOutput):
                 write_wikidata_pred(pred)
+            else:
+                raise ValueError(f'Unknown prediction type: {type(pred)}')
 
 
 @st.cache_resource()
