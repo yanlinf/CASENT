@@ -2,6 +2,7 @@ import streamlit as st
 import argparse
 import pandas as pd
 import re
+import stanza
 from casent.entity_typing_t5 import *
 
 MODEL_CHECKPOINT_MAPPING = {
@@ -70,11 +71,13 @@ def entity_typing_demo(args):
         st.warning('⚠️ More than one entity mentions are marked.')
 
     if not run_button or len(doc) == 0:
-        st.stop()
+        return
+        # st.stop()
 
     if not ('<M>' in doc and '</M>' in doc and doc.index('<M>') < doc.index('</M>')):
         st.error('❌ Entity mention needs to be marked with `<M>` and `</M>`.')
-        st.stop()
+        return
+        # st.stop()
 
     st.markdown('### Model Output')
 
@@ -97,8 +100,63 @@ def entity_typing_demo(args):
             st.table(pd.DataFrame(type_score_pairs, columns=('Predicted label', 'Score')))
 
 
+@st.cache_resource()
+def load_stanza():
+    return stanza.Pipeline(
+        lang="en", processors="tokenize,pos,constituency", use_gpu=False
+    )
+
+
 def entity_extraction_demo(args):
-    pass
+    st.write('')
+    st.write('')
+
+    examples = [
+        'The Tenerife airport disaster occurred on March 27, 1977, when two Boeing 747 passenger jets collided on the runway at Los Rodeos Airport (now Tenerife North Airport) on the Spanish island of Tenerife. The collision occurred when KLM Flight 4805 initiated its takeoff run during dense fog while Pan Am Flight 1736 was still on the runway.'
+    ]
+
+    col1, col2 = st.columns([0.3, 0.7])
+
+    with col1:
+        target_type = st.selectbox('Target entity type', ['aircraft', 'event', 'airport', 'location', 'person'],
+                                   key='extraction_target_type_')
+
+    with col2:
+        example = st.selectbox('Example documents', ['Select a document'] + examples, key='extraction_example_')
+
+    doc = st.text_area(
+        'Paste your text below (max 128 words)',
+        '' if example == 'Select a document' else example,
+        height=150,
+        key='extraction_doc_',
+    ).strip()
+
+    predictors = load_predictors(run_on_cpu=args.cpu)
+
+    # default_threshold = 0.2
+    # threshold = st.slider('Threshold (only applicable to casent models):', 0., 1.,
+    #                       default_threshold, key='extraction_')
+
+    run_button = st.button(label='✨ Run Model', key='extraction_button_')
+
+    n_words = len(re.findall(r'\w+', doc))
+    if n_words > 128:
+        st.warning(f'⚠️ Your text contains more than 128 words.')
+
+    if not run_button or len(doc) == 0:
+        return
+
+    st.markdown('### Model Output')
+
+    mentions = extract_entities_by_type(
+        predictor=predictors['casent_t5_large'],
+        stanza_pipeline=load_stanza(),
+        text=doc,
+        target_ufet_type=target_type,
+    )
+
+    for mention in mentions:
+        st.write(mention)
 
 
 def main():
@@ -114,7 +172,8 @@ def main():
     )
     st.title('🎈 CASENT')
 
-    entity_typing, entity_extraction = st.tabs(['Entity Typing', 'Entity Extraction'])
+    entity_typing, entity_extraction = st.tabs(['Entity Typing',
+                                                'Entity Extraction'])
 
     with entity_typing:
         entity_typing_demo(args)
