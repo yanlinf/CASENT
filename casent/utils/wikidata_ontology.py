@@ -287,6 +287,10 @@ class WikidataConcept:
     description: Optional[str] = None
     alias_qids: List[str] = field(default_factory=list)
 
+    def __post_init__(self):
+        # note: this is a hack to make sure that the UFET types do not contain underscores
+        self.ufet_labels = [t.replace('_', ' ') for t in self.ufet_labels]
+
     def __hash__(self):
         return hash(self.wd_qid)
 
