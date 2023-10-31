@@ -80,7 +80,7 @@ def entity_typing_demo(args):
         return
         # st.stop()
 
-    st.markdown('### Model Output')
+    st.write('---')
 
     selected_models = [name for name, option in zip(MODEL_CHECKPOINT_MAPPING, model_options)
                        if option]
@@ -160,7 +160,7 @@ def entity_extraction_demo(args):
     if not run_button or len(doc) == 0:
         return
 
-    st.markdown('### Model Output')
+    st.write('---')
 
     mentions = extract_entities_by_type(
         predictor=predictors['casent_t5_large'],
@@ -175,10 +175,12 @@ def entity_extraction_demo(args):
 
     write_annotated_text(doc, mentions)
 
+    st.write('')
+    st.write('')
     with st.expander('View detailed outputs:'):
         for i, m in enumerate(mentions):
             st.write('---')
-            st.write(f'##### Entity {i}: "{m.mention_span}"')
+            st.write(f'##### Entity *{i}*: "{m.mention_span}"')
             st.write(m)
 
 
