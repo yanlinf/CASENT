@@ -1,4 +1,5 @@
 import streamlit as st
+from annotated_text import annotated_text
 import argparse
 import pandas as pd
 import re
@@ -107,6 +108,19 @@ def load_stanza(use_gpu: bool = False):
     )
 
 
+def write_annotated_text(doc: str, mentions: List[EntityMentionSpan]):
+    res = []
+    p = 0
+    for m in mentions:
+        res.append(doc[p:m.start_char])
+        # res.append((doc[m.start_char:m.end_char], f'{m.score:.2f}', '#c9821c'))
+        # res.append((doc[m.start_char:m.end_char], f'{m.score:.2f}'))
+        res.append((doc[m.start_char:m.end_char], f'{m.score:.2f}', '#5e98d1'))
+        p = m.end_char
+    res.append(doc[p:])
+    annotated_text(*res)
+
+
 def entity_extraction_demo(args):
     st.write('')
     st.write('')
@@ -159,9 +173,13 @@ def entity_extraction_demo(args):
 
     )
 
-    for mention in mentions:
-        st.write(mention)
-        assert doc[mention.start_char:mention.end_char] == mention.mention_span
+    write_annotated_text(doc, mentions)
+
+    with st.expander('View detailed outputs:'):
+        for i, m in enumerate(mentions):
+            st.write('---')
+            st.write(f'##### Entity {i}: "{m.mention_span}"')
+            st.write(m)
 
 
 def main():
