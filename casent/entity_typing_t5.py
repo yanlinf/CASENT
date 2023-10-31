@@ -659,7 +659,8 @@ def extract_entities_by_type(
         target_ufet_type: str,
         threshold: Optional[float] = None,
         eval_batch_size: int = 1,
-        use_gpu: bool = False
+        use_gpu: bool = False,
+        max_context_window_char: int = 512
 ) -> List[EntityMentionSpan]:
     if threshold is not None:
         raise NotImplementedError('threshold is not supported yet')
@@ -677,7 +678,11 @@ def extract_entities_by_type(
             end_char = sentence.tokens[end_token - 1].end_char
             span = text[start_char:end_char].strip()
             # print(span, start_char, end_char)
-            entity_typing_inputs.append(text[:start_char] + ' <M> ' + span + ' </M> ' + text[end_char:])
+            # entity_typing_inputs.append(text[:start_char] + ' <M> ' + span + ' </M> ' + text[end_char:])
+            quota = (max_context_window_char - len(span) - 32) // 2
+            entity_typing_inputs.append(text[start_char - quota:start_char]
+                                        + ' <M> ' + span + ' </M> '
+                                        + text[end_char:end_char + quota])
             spans.append(EntityMentionSpan(
                 start_char=start_char,
                 end_char=end_char,
