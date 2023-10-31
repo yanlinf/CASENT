@@ -8,10 +8,12 @@ from casent.entity_typing_t5 import *
 
 MODEL_CHECKPOINT_MAPPING = {
     'casent_t5_large': 'yanlinf/casent-large',
+    'casent_t5_large_wikidata': 'yanlinf/casent-large',
 }
 
 MODEL_DEVICE_MAPPING = {
     'casent_t5_large': 'cuda:0',
+    'casent_t5_large_wikidata': 'cuda:1',
 }
 
 EXAMPLE_INPUTS = [
@@ -26,10 +28,30 @@ EXAMPLE_INPUTS = [
 def load_predictors(run_on_cpu: bool = False):
     predictors = {}
     for name, path in MODEL_CHECKPOINT_MAPPING.items():
-        predictors[name] = T5ForEntityTypingPredictor.from_pretrained(path)
+        if name.endswith('_wikidata'):
+            predictors[name] = T5ForWikidataEntityTypingPredictor.from_pretrained(
+                path,
+                ontology_path='ontology_data/ontology_expanded.json',
+            )
+        else:
+            predictors[name] = T5ForEntityTypingPredictor.from_pretrained(path)
         if not run_on_cpu:
             predictors[name].to(torch.device(MODEL_DEVICE_MAPPING[name]))
     return predictors
+
+
+def write_ufet_pred(pred: EntityTypingOutput):
+    df = []
+    for ufet_type, score in zip(pred.types, pred.scores):
+        df.append((ufet_type, score))
+    st.table(pd.DataFrame(df, columns=('UFET Type', 'Score')))
+
+
+def write_wikidata_pred(pred: WikidataEntityTypingOutput):
+    df = []
+    for wd_type, score in zip(pred.wd_types, pred.scores):
+        df.append((' / '.join(wd_type.ufet_labels), wd_type.wd_qid, wd_type.wd_label, score))
+    st.table(pd.DataFrame(df, columns=('UFET Type', 'Wikidata QID', 'Wikidata Type', 'Score')))
 
 
 def entity_typing_demo(args):
@@ -38,7 +60,7 @@ def entity_typing_demo(args):
     st.write('Choose your models:')
     model_options = []
     for model in MODEL_CHECKPOINT_MAPPING:
-        model_options.append(st.checkbox(f'`{model}`', True))
+        model_options.append(st.checkbox(f'`{model}`', True if model == 'casent_t5_large' else False))
 
     example = st.selectbox('Example inputs', ['Select a sentence'] + EXAMPLE_INPUTS)
 
@@ -86,19 +108,21 @@ def entity_typing_demo(args):
                        if option]
 
     for model_name in selected_models:
-        predictor: T5ForEntityTypingPredictor = predictors[model_name]
+        predictor = predictors[model_name]
         pred, = predictor.predict_raw([doc])
-        type2score = {t: s for t, s in zip(pred.types, pred.scores)}
-        type_score_pairs = sorted(type2score.items(), key=lambda t: -t[1])
         st.write(f'`{model_name}`')
-        st.table(pd.DataFrame(type_score_pairs, columns=('Predicted label', 'Score')))
+        if isinstance(pred, EntityTypingOutput):
+            write_ufet_pred(pred)
+        else:
+            write_wikidata_pred(pred)
 
         if show_uncalibrated:
             st.write(f'`{model_name}` uncalibrated scores:')
             pred, = predictor.predict_raw([doc], do_calibration=False)
-            type2score = {t: s for t, s in zip(pred.types, pred.scores)}
-            type_score_pairs = sorted(type2score.items(), key=lambda t: -t[1])
-            st.table(pd.DataFrame(type_score_pairs, columns=('Predicted label', 'Score')))
+            if isinstance(pred, EntityTypingOutput):
+                write_ufet_pred(pred)
+            else:
+                write_wikidata_pred(pred)
 
 
 @st.cache_resource()
@@ -144,8 +168,6 @@ def entity_extraction_demo(args):
         height=150,
         key='extraction_doc_',
     ).strip()
-
-    predictors = load_predictors(run_on_cpu=args.cpu)
 
     # default_threshold = 0.2
     # threshold = st.slider('Threshold (only applicable to casent models):', 0., 1.,
