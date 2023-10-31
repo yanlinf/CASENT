@@ -341,6 +341,11 @@ class T5ForEntityTypingPredictor:
             else:
                 outputs = self.model.calibration(outputs)
 
+        for output in outputs:
+            type2score = {t: s for t, s in zip(output.types, output.scores)}
+            output.types = sorted(type2score.keys(), key=lambda t: -type2score[t])
+            output.scores = [type2score[t] for t in output.types]
+
         assert len(outputs) == input_ids.size(0)
         return outputs
 
@@ -567,6 +572,8 @@ class T5ForWikidataEntityTypingPredictor:
                         qid2score[c.wd_qid] = s
                     else:
                         qid2score[c.wd_qid] = max(qid2score[c.wd_qid], s)
+
+            wd_types = sorted(wd_types, key=lambda c: -qid2score[c.wd_qid])
 
             res.append(WikidataEntityTypingOutput(
                 wd_types=wd_types,
