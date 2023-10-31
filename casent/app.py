@@ -101,9 +101,9 @@ def entity_typing_demo(args):
 
 
 @st.cache_resource()
-def load_stanza():
+def load_stanza(use_gpu: bool = False):
     return stanza.Pipeline(
-        lang="en", processors="tokenize,pos,constituency", use_gpu=False
+        lang="en", processors="tokenize,pos,constituency", use_gpu=use_gpu
     )
 
 
@@ -150,18 +150,24 @@ def entity_extraction_demo(args):
 
     mentions = extract_entities_by_type(
         predictor=predictors['casent_t5_large'],
-        stanza_pipeline=load_stanza(),
+        stanza_pipeline=load_stanza(use_gpu=not args.cpu),
         text=doc,
         target_ufet_type=target_type,
+        threshold=None,
+        eval_batch_size=args.extraction_eval_batch_size,
+        use_gpu=not args.cpu,
+
     )
 
     for mention in mentions:
         st.write(mention)
+        assert doc[mention.start_char:mention.end_char] == mention.mention_span
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--cpu', action='store_true')
+    parser.add_argument('--extraction_eval_batch_size', type=int, default=8)
     args = parser.parse_args()
     print(args)
     print()

@@ -665,7 +665,7 @@ def extract_entities_by_type(
             start_char = sentence.tokens[start_token].start_char
             end_char = sentence.tokens[end_token - 1].end_char
             span = text[start_char:end_char].strip()
-            print(span)
+            # print(span)
             entity_typing_inputs.append(text[:start_char] + ' <M> ' + span + ' </M> ' + text[end_char:])
             spans.append(EntityMentionSpan(
                 start_char=start_char,
