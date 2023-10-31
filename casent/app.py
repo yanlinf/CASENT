@@ -10,8 +10,8 @@ from casent.entity_typing_t5 import *
 logger = get_logger(__name__)
 
 MODEL_CHECKPOINT_MAPPING = {
-    'casent_t5_large': 'yanlinf/casent-large',
     'casent_t5_large_wikidata': 'yanlinf/casent-large',
+    'casent_t5_large': 'yanlinf/casent-large',
 }
 
 MODEL_DEVICE_MAPPING = {
@@ -65,7 +65,7 @@ def entity_typing_demo(args):
     st.write('Choose your models:')
     model_options = []
     for model in MODEL_CHECKPOINT_MAPPING:
-        model_options.append(st.checkbox(f'`{model}`', True if model == 'casent_t5_large' else False))
+        model_options.append(st.checkbox(f'`{model}`', True if model == 'casent_t5_large_wikidata' else False))
 
     example = st.selectbox('Example inputs', ['Select a sentence'] + EXAMPLE_INPUTS)
 
@@ -168,7 +168,7 @@ def entity_extraction_demo(args):
         example = st.selectbox('Example documents', ['Select a document'] + examples, key='extraction_example_')
 
     doc = st.text_area(
-        'Paste your text below (max 128 words)',
+        'Paste your text below',
         '' if example == 'Select a document' else example,
         height=150,
         key='extraction_doc_',
@@ -180,9 +180,9 @@ def entity_extraction_demo(args):
 
     run_button = st.button(label='✨ Run Model', key='extraction_button_')
 
-    n_words = len(re.findall(r'\w+', doc))
-    if n_words > 128:
-        st.warning(f'⚠️ Your text contains more than 128 words.')
+    # n_words = len(re.findall(r'\w+', doc))
+    # if n_words > 128:
+    #     st.warning(f'⚠️ Your text contains more than 128 words.')
 
     if not run_button or len(doc) == 0:
         return
