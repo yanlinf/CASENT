@@ -63,9 +63,11 @@ def entity_typing_demo(args):
     st.write('')
     st.write('')
     st.write('Choose your models:')
-    model_options = []
-    for model in MODEL_CHECKPOINT_MAPPING:
-        model_options.append(st.checkbox(f'`{model}`', True if model == 'casent_t5_large_wikidata' else False))
+    model_options = [
+        st.checkbox('`casent_t5_large_wikidata`', True),
+    ]
+    # for model in MODEL_CHECKPOINT_MAPPING:
+    #     model_options.append(st.checkbox(f'`{model}`', True if model == 'casent_t5_large_wikidata' else False))
 
     example = st.selectbox('Example inputs', ['Select a sentence'] + EXAMPLE_INPUTS)
 
@@ -83,11 +85,10 @@ def entity_typing_demo(args):
 
     show_uncalibrated = st.checkbox('Show uncalibrated scores', False)
 
-    for name, predictor in predictors.items():
-        threshold_length = predictor.model.calibration.threshold.size(0)
-        predictor.model.calibration.update_params(
-            threshold=torch.full((threshold_length,), threshold)
-        )
+    threshold_length = predictors['casent_t5_large_wikidata'].model.calibration.threshold.size(0)
+    predictors['casent_t5_large_wikidata'].model.calibration.update_params(
+        threshold=torch.full((threshold_length,), threshold)
+    )
 
     run_button = st.button(label='✨ Run Model')
 
