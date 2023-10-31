@@ -187,6 +187,8 @@ def entity_extraction_demo(args):
     if not run_button or len(doc) == 0:
         return
 
+    predictors = load_predictors(use_gpu=args.use_gpu)
+
     st.write('---')
 
     mentions = extract_entities_by_type(
