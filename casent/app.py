@@ -4,7 +4,10 @@ import argparse
 import pandas as pd
 import re
 import stanza
+from streamlit.logger import get_logger
 from casent.entity_typing_t5 import *
+
+logger = get_logger(__name__)
 
 MODEL_CHECKPOINT_MAPPING = {
     'casent_t5_large': 'yanlinf/casent-large',
@@ -25,7 +28,7 @@ EXAMPLE_INPUTS = [
 
 
 @st.cache_resource()
-def load_predictors(run_on_cpu: bool = False):
+def load_predictors(use_gpu: bool = False):
     predictors = {}
     for name, path in MODEL_CHECKPOINT_MAPPING.items():
         if name.endswith('_wikidata'):
@@ -35,8 +38,10 @@ def load_predictors(run_on_cpu: bool = False):
             )
         else:
             predictors[name] = T5ForEntityTypingPredictor.from_pretrained(path)
-        if not run_on_cpu:
+        if use_gpu:
             predictors[name].to(torch.device(MODEL_DEVICE_MAPPING[name]))
+        else:
+            predictors[name].to(torch.device('cpu'))
     return predictors
 
 
@@ -70,7 +75,7 @@ def entity_typing_demo(args):
         height=150,
     ).strip()
 
-    predictors = load_predictors(run_on_cpu=args.cpu)
+    predictors = load_predictors(use_gpu=args.use_gpu)
 
     default_threshold = 0.2
     threshold = st.slider('Threshold (only applicable to casent models):', 0., 1.,
@@ -113,7 +118,7 @@ def entity_typing_demo(args):
         st.write(f'`{model_name}`')
         if isinstance(pred, EntityTypingOutput):
             write_ufet_pred(pred)
-        else:
+        elif isinstance(pred, WikidataEntityTypingOutput):
             write_wikidata_pred(pred)
 
         if show_uncalibrated:
@@ -121,7 +126,7 @@ def entity_typing_demo(args):
             pred, = predictor.predict_raw([doc], do_calibration=False)
             if isinstance(pred, EntityTypingOutput):
                 write_ufet_pred(pred)
-            else:
+            elif isinstance(pred, WikidataEntityTypingOutput):
                 write_wikidata_pred(pred)
 
 
@@ -186,12 +191,12 @@ def entity_extraction_demo(args):
 
     mentions = extract_entities_by_type(
         predictor=predictors['casent_t5_large'],
-        stanza_pipeline=load_stanza(use_gpu=not args.cpu),
+        stanza_pipeline=load_stanza(use_gpu=args.use_gpu),
         text=doc,
         target_ufet_type=target_type,
         threshold=None,
         eval_batch_size=args.extraction_eval_batch_size,
-        use_gpu=not args.cpu,
+        use_gpu=args.use_gpu,
 
     )
 
@@ -208,11 +213,11 @@ def entity_extraction_demo(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cpu', action='store_true')
+    parser.add_argument('--use_gpu', action='store_true')
     parser.add_argument('--extraction_eval_batch_size', type=int, default=8)
     args = parser.parse_args()
-    print(args)
-    print()
+    logger.info(args)
+    logger.info('')
 
     st.set_page_config(
         page_title='CASENT',
