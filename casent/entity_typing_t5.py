@@ -653,6 +653,9 @@ def extract_entities_by_type(
         eval_batch_size: int = 1,
         use_gpu: bool = False
 ) -> List[EntityMentionSpan]:
+    if threshold is not None:
+        raise NotImplementedError('threshold is not supported yet')
+
     if use_gpu:
         predictor.to(torch.device('cuda:0'))
 
@@ -665,7 +668,7 @@ def extract_entities_by_type(
             start_char = sentence.tokens[start_token].start_char
             end_char = sentence.tokens[end_token - 1].end_char
             span = text[start_char:end_char].strip()
-            # print(span)
+            # print(span, start_char, end_char)
             entity_typing_inputs.append(text[:start_char] + ' <M> ' + span + ' </M> ' + text[end_char:])
             spans.append(EntityMentionSpan(
                 start_char=start_char,
