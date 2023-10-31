@@ -439,7 +439,8 @@ class T5ForWikidataEntityTypingPredictor:
         self._update_trie()
 
         self.ontology = ontology
-        self.ufet2wd = {t: c for c in ontology.concepts() for t in c.ufet_labels}
+        self.ufet2wd = {t.replace('_', ' '): c for c in ontology.concepts() for t in
+                        c.ufet_labels}  # note: ufet labels in the ontology file contain underscores
 
         self.preprocess_fn = T5Preprocessor(tokenizer=self.tokenizer,
                                             max_length=self.config.entity_max_length,
