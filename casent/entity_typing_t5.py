@@ -665,6 +665,8 @@ def extract_entities_by_type(
     if threshold is not None:
         raise NotImplementedError('threshold is not supported yet')
 
+    assert '_' not in target_ufet_type, 'UFET types should not contain underscores'
+
     if use_gpu:
         predictor.to(torch.device('cuda:0'))
 

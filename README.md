@@ -28,6 +28,8 @@ pip install -e .
 
 Pretrained models are available on HuggingFace for running inference.
 
+⚠️ Please note that we eliminate underscores from all UFET types by default.
+
 ### Usage 1: Predict UFET types
 
 ```python
