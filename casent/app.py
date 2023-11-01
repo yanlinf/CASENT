@@ -117,9 +117,9 @@ def entity_typing_demo(args):
         predictor = predictors[model_name]
         pred, = predictor.predict_raw([doc])
         st.write(f'`{model_name}`')
-        if isinstance(pred, EntityTypingOutput):
+        if hasattr(pred, 'types'):
             write_ufet_pred(pred)
-        elif isinstance(pred, WikidataEntityTypingOutput):
+        elif hasattr(pred, 'wd_types'):
             write_wikidata_pred(pred)
         else:
             raise ValueError(f'Unknown prediction type: {type(pred)}')
@@ -127,9 +127,9 @@ def entity_typing_demo(args):
         if show_uncalibrated:
             st.write(f'`{model_name}` uncalibrated scores:')
             pred, = predictor.predict_raw([doc], do_calibration=False)
-            if isinstance(pred, EntityTypingOutput):
+            if hasattr(pred, 'types'):
                 write_ufet_pred(pred)
-            elif isinstance(pred, WikidataEntityTypingOutput):
+            elif hasattr(pred, 'wd_types'):
                 write_wikidata_pred(pred)
             else:
                 raise ValueError(f'Unknown prediction type: {type(pred)}')
