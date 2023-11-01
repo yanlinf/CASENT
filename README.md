@@ -73,7 +73,7 @@ import stanza
 
 extract_entities_by_type(
     T5ForEntityTypingPredictor.from_pretrained('yanlinf/casent-large'),
-    stanza.Pipeline(lang="en", processors="tokenize,pos,constituency", use_gpu=True),
+    stanza.Pipeline(lang="en", processors="tokenize,pos,constituency", use_gpu=False),
     text='The Tenerife airport disaster occurred on March 27, 1977, when two Boeing 747 passenger jets collided on the runway at Los Rodeos Airport (now Tenerife North Airport) on the Spanish island of Tenerife. The collision occurred when KLM Flight 4805 initiated its takeoff run during dense fog while Pan Am Flight 1736 was still on the runway.', 
     target_ufet_type='aircraft'
 )
