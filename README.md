@@ -2,14 +2,16 @@
 
 [![](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) 
 [![](https://img.shields.io/badge/🤗-HuggingFace-red.svg)](https://huggingface.co/yanlinf/casent-large)
-[![](https://img.shields.io/badge/📄-Paper-yellow.svg)](https://huggingface.co/yanlinf/casent-large)
+[![](https://img.shields.io/badge/emnlp23-Paper-yellow.svg)](https://huggingface.co/yanlinf/casent-large)
 [![](https://img.shields.io/badge/🎈-Demo-blue.svg)](http://chronos.lti.cs.cmu.edu:8401/)
 
 > Calibrated Seq2Seq Models for Efficient and Generalizable Ultra-fine Entity Typing<br/>
 > Yanlin Feng, Adithya Pratapa, David R Mortensen<br/>
 > EMNLP Findings 2023
 
-CASENT (Calibrated Seq2Seq for Entity Typing) is a multi-label entity classification model designed for extremely large label space. CASENT offers several advantages compared to previous methods: 1) Standard maximum likelihood training; 2) Efficient inference through a single autoregressive decoding pass; 3) Calibrated confidence scores; 4) Strong generalization performance to unseen domains and types. We have provided pretrained models that work with both the UFET types and WikiData types.
+CASENT is a lightweight multi-label entity classification model designed for extremely large label space (e.g., UFET and WikiData). It can also be used for entity extraction and tagging when integrated with a span detector.
+
+CASENT offers several advantages compared to previous methods: 1) Standard maximum likelihood training; 2) Efficient inference through a single autoregressive decoding pass; 3) Calibrated confidence scores; 4) Strong generalization performance to unseen domains and types. 
 
 ## Installation
 
@@ -60,6 +62,26 @@ predictor.predict_raw(
 ```plain
 [WikidataEntityTypingOutput(wd_types=[Concept(Q215627, person), Concept(Q2159907, criminal), Concept(Q6581097, male)], scores=[0.975004041450473, 0.6304963191225533, 0.5362320213818272])]
 ```
+
+### Usage 3: Entity extraction / tagging
+
+CASENT can also be used to extract entities of a specific type from text, when used in conjunction with a span detector. We provide a simple API that leverages a constituency parser that considers all noun phrases as potential entity mentions (this allows us to extract non-named entities).
+
+```python
+from casent.entity_typing_t5 import T5ForEntityTypingPredictor, extract_entities_by_type
+import stanza
+
+extract_entities_by_type(
+    T5ForEntityTypingPredictor.from_pretrained('yanlinf/casent-large'),
+    stanza.Pipeline(lang="en", processors="tokenize,pos,constituency", use_gpu=True),
+    text='The Tenerife airport disaster occurred on March 27, 1977, when two Boeing 747 passenger jets collided on the runway at Los Rodeos Airport (now Tenerife North Airport) on the Spanish island of Tenerife. The collision occurred when KLM Flight 4805 initiated its takeoff run during dense fog while Pan Am Flight 1736 was still on the runway.', 
+    target_ufet_type='aircraft'
+)
+```
+
+```plain
+[Mention("two Boeing 747 passenger jets", 0.82), Mention("KLM Flight 4805", 0.77), Mention("Pan Am Flight 1736", 0.72)]
+ ```
 
 ## Training CASENT
 
