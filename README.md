@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) 
 [![](https://img.shields.io/badge/🤗-HuggingFace-red.svg)](https://huggingface.co/yanlinf/casent-large)
-[![](https://img.shields.io/badge/emnlp23-Paper-yellow.svg)](https://huggingface.co/yanlinf/casent-large)
+[![](https://img.shields.io/badge/emnlp23-Paper-yellow.svg)](https://arxiv.org/pdf/2311.00835.pdf)
 [![](https://img.shields.io/badge/🎈-Demo-blue.svg)](http://chronos.lti.cs.cmu.edu:8401/)
 
 > Calibrated Seq2Seq Models for Efficient and Generalizable Ultra-fine Entity Typing<br/>
