@@ -3,7 +3,7 @@
 [![](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) 
 [![](https://img.shields.io/badge/🤗-HuggingFace-red.svg)](https://huggingface.co/yanlinf/casent-large)
 [![](https://img.shields.io/badge/emnlp23-Paper-yellow.svg)](https://arxiv.org/pdf/2311.00835.pdf)
-[![](https://img.shields.io/badge/🎈-Demo-blue.svg)](http://chronos.lti.cs.cmu.edu:8401/)
+[![](https://img.shields.io/badge/🎈-Demo-blue.svg)](http://schank.lti.cs.cmu.edu:8401/)
 
 > Calibrated Seq2Seq Models for Efficient and Generalizable Ultra-fine Entity Typing<br/>
 > Yanlin Feng, Adithya Pratapa, David R Mortensen<br/>
@@ -15,7 +15,7 @@ CASENT offers several advantages compared to previous methods: 1) Standard maxim
 
 ## Installation
 
-##### 1. Install Dependency
+##### 1. Install dependencies
 
 ```bash
 conda create -n casent python=3.10
@@ -24,6 +24,8 @@ git clone https://github.com/yanlinf/CASENT.git
 cd CASENT
 pip install -r requirements.txt
 ```
+
+Note: Install PyTorch manually first if the above commands do not work.
 
 ##### 2. Install CASENT
 
