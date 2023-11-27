@@ -15,12 +15,19 @@ CASENT offers several advantages compared to previous methods: 1) Standard maxim
 
 ## Installation
 
+##### 1. Install Dependency
+
 ```bash
 conda create -n casent python=3.10
 conda activate casent
 git clone https://github.com/yanlinf/CASENT.git
 cd CASENT
 pip install -r requirements.txt
+```
+
+##### 2. Install CASENT
+
+```
 pip install -e .
 ```
 
